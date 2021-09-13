@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
-
-import { environment } from '../environments/environment';
+import { LoggerService } from '@flight-workspace/logger-lib';
 
 @Component({
   selector: 'flight-app',
@@ -8,9 +7,8 @@ import { environment } from '../environments/environment';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  constructor() {
-    if (!environment.production) {
-      console.warn('hello from your console');
-    }
+  constructor(private loggerService: LoggerService) {
+    this.loggerService.log('log');
+    this.loggerService.debug('debug');
   }
 }
