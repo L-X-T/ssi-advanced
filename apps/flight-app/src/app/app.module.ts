@@ -18,6 +18,11 @@ import { CustomLogFormatterService } from './shared/logging/custom-log-formatter
 
 import { ReactiveFormsModule } from '@angular/forms';
 import { FlightLookaheadComponent } from './flight-lookahead/flight-lookahead.component';
+import { StoreModule } from '@ngrx/store';
+import { reducers, metaReducers } from './+state';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { environment } from '../environments/environment';
+import { EffectsModule } from '@ngrx/effects';
 
 @NgModule({
   imports: [
@@ -34,7 +39,11 @@ import { FlightLookaheadComponent } from './flight-lookahead/flight-lookahead.co
 
     LoggerModule.forRoot({ enableDebug: true, logFormatterType: CustomLogFormatterService }),
 
-    ReactiveFormsModule
+    ReactiveFormsModule,
+
+    StoreModule.forRoot(reducers, { metaReducers }),
+    !environment.production ? StoreDevtoolsModule.instrument() : [],
+    EffectsModule.forRoot([])
   ],
   declarations: [AppComponent, SidebarComponent, NavbarComponent, HomeComponent, BasketComponent, FlightLookaheadComponent],
   providers: [],
