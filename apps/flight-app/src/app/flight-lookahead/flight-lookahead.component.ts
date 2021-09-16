@@ -11,7 +11,9 @@ import { debounceTime, distinctUntilChanged, filter, map, pairwise, startWith, s
   styleUrls: ['./flight-lookahead.component.css']
 })
 export class FlightLookaheadComponent implements OnInit {
-  control = new FormControl('', { nonNullable: true });
+  fromControl = new FormControl('', { nonNullable: true });
+  toControl = new FormControl('', { nonNullable: true });
+
   flights$: Observable<Flight[]> | undefined;
   diff$: Observable<number> | undefined;
   isLoading = false;
@@ -22,7 +24,22 @@ export class FlightLookaheadComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    const input$ = this.control.valueChanges.pipe(debounceTime(300));
+    /*this.control = new FormControl();
+    const input$ = this.control.valueChanges.pipe(debounceTime(300));*/
+
+    const fromInput$ = this.fromControl.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      // filter((input) => input.length > 2),
+      distinctUntilChanged()
+    );
+
+    const toInput$ = this.toControl.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      // filter((input) => input.length > 2),
+      distinctUntilChanged()
+    );
 
     /*this.flights$ = this.control.valueChanges.pipe(
       debounceTime(300),
@@ -40,13 +57,14 @@ export class FlightLookaheadComponent implements OnInit {
       tap((value) => (this.isOnline = value))
     );
 
-    this.flights$ = combineLatest([input$, this.online$]).pipe(
-      filter(([, online]) => online),
-      map(([input]) => input),
-      distinctUntilChanged(),
-      tap((i) => (this.isLoading = true)),
-      switchMap((input: string) => this.load(input)),
-      tap((v) => (this.isLoading = false))
+    this.flights$ = combineLatest([fromInput$, toInput$, this.online$]).pipe(
+      filter(([f, t, online]: [string, string, boolean]) => !!(f || t) && online),
+      distinctUntilChanged(
+        (x: [from: string, to: string, _: boolean], y: [from: string, to: string, _: boolean]) => x[0] === y[0] && x[1] === y[1]
+      ),
+      tap(([f, t, _]) => (this.isLoading = true)),
+      switchMap(([from, to, _]) => this.load(from, to)),
+      tap((a) => (this.isLoading = false))
     );
 
     this.diff$ = this.flights$.pipe(
@@ -55,9 +73,9 @@ export class FlightLookaheadComponent implements OnInit {
     );
   }
 
-  load(from: string): Observable<Flight[]> {
+  load(from: string, to: string = ''): Observable<Flight[]> {
     const url = 'http://www.angular.at/api/flight';
-    const params = new HttpParams().set('from', from);
+    const params = new HttpParams().set('from', from).set('to', to);
     const headers = new HttpHeaders().set('Accept', 'application/json');
 
     return this.http.get<Flight[]>(url, { params, headers });
