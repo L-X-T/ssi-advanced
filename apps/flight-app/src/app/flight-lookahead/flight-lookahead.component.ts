@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Flight } from '@flight-workspace/flight-lib';
-import { combineLatest, interval, merge, Observable, Subject } from 'rxjs';
+import { combineLatest, interval, merge, Observable, of, Subject } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { debounceTime, distinctUntilChanged, filter, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, filter, map, pairwise, retry, startWith, switchMap, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'flight-workspace-flight-lookahead',
@@ -55,7 +55,8 @@ export class FlightLookaheadComponent implements OnInit {
 
     this.online$ = interval(2000).pipe(
       startWith(0),
-      map((_) => Math.random() < 0.5),
+      // map((_) => Math.random() < 0.5),
+      map((_) => true), // deactivated online flag
       distinctUntilChanged(),
       tap((value) => (this.isOnline = value))
     );
@@ -71,9 +72,19 @@ export class FlightLookaheadComponent implements OnInit {
 
     this.flights$ = merge(combined$, refresh$).pipe(
       filter(([f, t, online]) => !!(f || t) && online),
+      map(([f, t, _]) => [f, t]),
       // distinctUntilChanged((x: [from: string, to: string], y: [from: string, to: string]) => x[0] === y[0] && x[1] === y[1]),
-      tap(([f, t, _]) => (this.isLoading = true)),
-      switchMap(([from, to, _]) => this.load(from, to)),
+      tap(([f, t]) => (this.isLoading = true)),
+      switchMap(([from, to]) =>
+        this.load(from, to).pipe(
+          retry(3), // you retry 3 times
+          catchError((err) => {
+            console.log('Error caught:');
+            console.log(err);
+            return of([]);
+          }) // if all fail catch error
+        )
+      ),
       tap((a) => (this.isLoading = false))
     );
 
