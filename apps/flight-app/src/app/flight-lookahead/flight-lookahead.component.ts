@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Flight } from '@flight-workspace/flight-lib';
-import { Observable } from 'rxjs';
+import { combineLatest, interval, Observable } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { debounceTime, distinctUntilChanged, filter, map, pairwise, switchMap, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'flight-workspace-flight-lookahead',
@@ -16,15 +16,36 @@ export class FlightLookaheadComponent implements OnInit {
   diff$: Observable<number> | undefined;
   isLoading = false;
 
+  isOnline = false;
+  online$: Observable<boolean> | undefined;
+
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.flights$ = this.control.valueChanges.pipe(
+    const input$ = this.control.valueChanges.pipe(debounceTime(300));
+
+    /*this.flights$ = this.control.valueChanges.pipe(
       debounceTime(300),
       filter((input) => input.length > 2),
       distinctUntilChanged(),
       tap((i) => (this.isLoading = true)),
       switchMap((input) => this.load(input)),
+      tap((v) => (this.isLoading = false))
+    );*/
+
+    this.online$ = interval(2000).pipe(
+      startWith(0),
+      map((_) => Math.random() < 0.5),
+      distinctUntilChanged(),
+      tap((value) => (this.isOnline = value))
+    );
+
+    this.flights$ = combineLatest([input$, this.online$]).pipe(
+      filter(([, online]) => online),
+      map(([input]) => input),
+      distinctUntilChanged(),
+      tap((i) => (this.isLoading = true)),
+      switchMap((input: string) => this.load(input)),
       tap((v) => (this.isLoading = false))
     );
 
