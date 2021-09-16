@@ -3,7 +3,7 @@ import { FormControl } from '@angular/forms';
 import { Flight } from '@flight-workspace/flight-lib';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { debounceTime, switchMap, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, switchMap, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'flight-workspace-flight-lookahead',
@@ -20,6 +20,8 @@ export class FlightLookaheadComponent implements OnInit {
   ngOnInit(): void {
     this.flights$ = this.control.valueChanges.pipe(
       debounceTime(300),
+      filter((input) => input.length > 2),
+      distinctUntilChanged(),
       tap((i) => (this.isLoading = true)),
       switchMap((input) => this.load(input)),
       tap((v) => (this.isLoading = false))
