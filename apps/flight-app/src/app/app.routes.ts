@@ -4,6 +4,8 @@ import { HomeComponent } from './home/home.component';
 
 import { loadRemoteModule } from '@angular-architects/module-federation';
 
+import { FlightLookaheadComponent } from './flight-lookahead/flight-lookahead.component';
+
 export const APP_ROUTES: Routes = [
   {
     path: '',
@@ -27,6 +29,10 @@ export const APP_ROUTES: Routes = [
         remoteEntry: 'http://localhost:4201/remoteEntry.js',
         exposedModule: './module'
       }).then((esm) => esm.PassengerModule)
+  },
+  {
+    path: 'flight-lookahead',
+    component: FlightLookaheadComponent
   },
   {
     path: '**',
