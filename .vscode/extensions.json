@@ -1,9 +1,11 @@
 {
   "recommendations": [
-    "nrwl.angular-console",
     "angular.ng-template",
-    "ms-vscode.vscode-typescript-tslint-plugin",
+    "cyrilletuzi.angular-schematics",
+    "nrwl.angular-console",
+    "steoates.autoimport",
+    "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "firsttris.vscode-jest-runner"
+    "vscode-icons-team.vscode-icons"
   ]
 }

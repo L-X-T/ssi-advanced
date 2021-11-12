@@ -12,25 +12,25 @@ import { map } from 'rxjs/operators';
 })
 export class HomeComponent implements OnInit {
   expertMode = false;
-  needsLogin$: Observable<boolean>;
+  needsLogin$: Observable<boolean> | undefined;
+
+  constructor(private route: ActivatedRoute) {}
+
   _userName = '';
 
   get userName(): string {
     return this._userName;
   }
 
-  constructor(private route: ActivatedRoute) {}
-
-  changed($event): void {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  changed($event: any): void {
     console.debug('$event.detail ', $event.target.detail);
 
     this.expertMode = $event.detail;
   }
 
-  ngOnInit() {
-    this.needsLogin$ = this.route.params.pipe(
-      map(params => !!params['needsLogin'])
-    );
+  ngOnInit(): void {
+    this.needsLogin$ = this.route.params.pipe(map((params) => !!params['needsLogin']));
   }
 
   login(): void {
