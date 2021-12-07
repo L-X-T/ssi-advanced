@@ -15,6 +15,9 @@
     </div>
 
     <div [ngStyle]="{ 'background-color' : isOnline ? 'green' : 'red' }">Online: {{ isOnline }}</div>
+    <div class="control-group">
+      <button class="btn btn-click" (click)="refresh()">Refresh</button>
+    </div>
 
     <div *ngIf="isLoading">Loading ...</div>
     <div *ngIf="!isLoading && (diff$ | async) as diff">Differenz: {{ diff }}</div>

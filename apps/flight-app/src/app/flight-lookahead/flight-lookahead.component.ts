@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Flight } from '@flight-workspace/flight-lib';
-import { combineLatest, interval, Observable } from 'rxjs';
+import { combineLatest, interval, merge, Observable, Subject } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { debounceTime, distinctUntilChanged, filter, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
 
@@ -20,6 +20,9 @@ export class FlightLookaheadComponent implements OnInit {
 
   isOnline = false;
   online$: Observable<boolean> | undefined;
+
+  private refreshClickSubject = new Subject<void>();
+  readonly refreshClick$ = this.refreshClickSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -57,11 +60,18 @@ export class FlightLookaheadComponent implements OnInit {
       tap((value) => (this.isOnline = value))
     );
 
-    this.flights$ = combineLatest([fromInput$, toInput$, this.online$]).pipe(
-      filter(([f, t, online]: [string, string, boolean]) => !!(f || t) && online),
+    const combined$ = combineLatest([fromInput$, toInput$, this.online$]).pipe(
       distinctUntilChanged(
-        (x: [from: string, to: string, _: boolean], y: [from: string, to: string, _: boolean]) => x[0] === y[0] && x[1] === y[1]
-      ),
+        (x: [from: string, to: string, online: boolean], y: [from: string, to: string, online: boolean]) => x[0] === y[0] && x[1] === y[1]
+      )
+    );
+    const refresh$: Observable<[string, string, boolean]> = this.refreshClick$.pipe(
+      map((_) => [this.fromControl.value, this.toControl.value, this.isOnline])
+    );
+
+    this.flights$ = merge(combined$, refresh$).pipe(
+      filter(([f, t, online]) => !!(f || t) && online),
+      // distinctUntilChanged((x: [from: string, to: string], y: [from: string, to: string]) => x[0] === y[0] && x[1] === y[1]),
       tap(([f, t, _]) => (this.isLoading = true)),
       switchMap(([from, to, _]) => this.load(from, to)),
       tap((a) => (this.isLoading = false))
@@ -79,5 +89,9 @@ export class FlightLookaheadComponent implements OnInit {
     const headers = new HttpHeaders().set('Accept', 'application/json');
 
     return this.http.get<Flight[]>(url, { params, headers });
+  }
+
+  refresh(): void {
+    this.refreshClickSubject.next(void 0);
   }
 }
