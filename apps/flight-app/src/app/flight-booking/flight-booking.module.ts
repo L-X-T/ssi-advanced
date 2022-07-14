@@ -21,7 +21,6 @@ import { AirportComponent } from './airport/airport.component';
     FlightBookingComponent,
     AirportComponent
   ],
-
   providers: [],
   exports: [FlightSearchComponent]
 })
