@@ -1,9 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Flight } from '@flight-workspace/flight-lib';
-import { combineLatest, interval, merge, Observable, of, Subject } from 'rxjs';
+import { combineLatest, from, interval, merge, Observable, of, Subject } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { catchError, debounceTime, distinctUntilChanged, filter, map, pairwise, retry, startWith, switchMap, tap } from 'rxjs/operators';
+import {
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  map,
+  pairwise,
+  retry,
+  share,
+  startWith,
+  switchMap,
+  tap
+} from 'rxjs/operators';
 
 @Component({
   selector: 'flight-workspace-flight-lookahead',
@@ -18,7 +30,6 @@ export class FlightLookaheadComponent implements OnInit {
   diff$: Observable<number> | undefined;
   isLoading = false;
 
-  isOnline = false;
   online$: Observable<boolean> | undefined;
 
   private refreshClickSubject = new Subject<void>();
@@ -55,25 +66,24 @@ export class FlightLookaheadComponent implements OnInit {
 
     this.online$ = interval(2000).pipe(
       startWith(0),
-      // map((_) => Math.random() < 0.5),
-      map((_) => true), // deactivated online flag
-      distinctUntilChanged(),
-      tap((value) => (this.isOnline = value))
+      map((_) => Math.random() < 0.5),
+      distinctUntilChanged()
     );
 
     const combined$ = combineLatest([fromInput$, toInput$, this.online$]).pipe(
       distinctUntilChanged(
-        (x: [from: string, to: string, online: boolean], y: [from: string, to: string, online: boolean]) => x[0] === y[0] && x[1] === y[1]
+        (x: [from: string, to: string, online: boolean], y: [from: string, to: string, online: boolean]) =>
+          x[0] === y[0] && x[1] === y[1] && x[2] === y[2]
       )
     );
-    const refresh$: Observable<[string, string, boolean]> = this.refreshClick$.pipe(
-      map((_) => [this.fromControl.value, this.toControl.value, this.isOnline])
+
+    const combinedRefresh$: Observable<[string, string, boolean]> = this.refreshClick$.pipe(
+      map((_) => [this.fromControl.value, this.toControl.value, true])
     );
 
-    this.flights$ = merge(combined$, refresh$).pipe(
-      filter(([f, t, online]) => !!(f || t) && online),
+    this.flights$ = merge(combined$, combinedRefresh$).pipe(
+      filter(([f, t, online]: [string, string, boolean]) => !!(f || t) && online),
       map(([f, t, _]) => [f, t]),
-      // distinctUntilChanged((x: [from: string, to: string], y: [from: string, to: string]) => x[0] === y[0] && x[1] === y[1]),
       tap(([f, t]) => (this.isLoading = true)),
       switchMap(([from, to]) =>
         this.load(from, to).pipe(
@@ -85,7 +95,8 @@ export class FlightLookaheadComponent implements OnInit {
           }) // if all fail catch error
         )
       ),
-      tap((a) => (this.isLoading = false))
+      tap((a) => (this.isLoading = false)),
+      share()
     );
 
     this.diff$ = this.flights$.pipe(

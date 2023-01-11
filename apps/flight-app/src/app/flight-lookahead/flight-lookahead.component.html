@@ -14,7 +14,9 @@
       <input [formControl]="toControl" class="form-control">
     </div>
 
-    <div [ngStyle]="{ 'background-color' : isOnline ? 'green' : 'red' }">Online: {{ isOnline }}</div>
+    <div *ngIf="online$ | async; else isOffline" style="background-color: darkgreen">Online</div>
+    <ng-template #isOffline><div style="background-color: darkred">Offline</div></ng-template>
+
     <div class="control-group">
       <button class="btn btn-click" (click)="refresh()">Refresh</button>
     </div>
