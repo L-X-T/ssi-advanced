@@ -382,19 +382,19 @@ refresh(): void {
 const debouncedFrom$ = this.controlFrom.valueChanges.pipe(debounceTime(300));
 const debouncedTo$ = this.controlTo.valueChanges.pipe(debounceTime(300));
 
-const combined$ = combineLatest([debouncedFrom$, debouncedTo$, this.online$])
-                    .pipe(shareReplay({ bufferSize:1, refCount: true }));
+const combined$ = combineLatest([debouncedFrom$, debouncedTo$, this.online$]).pipe(
+  // [...]
+);
 
-this.flights$ = merge(
-    combined$,
-    this.refreshClick$.pipe(map(_ => [this.controlFrom.value, this.controlTo.value, this.online]))
+// we need to type this Observable to make the strict mode happy ;-)
+const combinedRefresh$: Observable<[string, string, boolean]> = this.refreshClick$.pipe(
+  map((_) => [this.fromControl.value, this.toControl.value, true])
+);
 
-    // This is an alternative without side effects (like this.online):
-    // this.refreshClick$.pipe(switchMap(_ => combined$.pipe(take(1))))
-).pipe(
-    filter(([f, t,  online]: [string, string, boolean]) => online),
-    map(([from, to, _]) => [from, to]),
-    // further remaining operators
+this.flights$ = merge(combined$, combinedRefresh$).pipe(
+  filter(([f, t, online]: [string, string, boolean]) => !!(f || t) && online),
+  map(([from, to, _]) => [from, to]), 
+  // further remaining operators
 );
 ```
 

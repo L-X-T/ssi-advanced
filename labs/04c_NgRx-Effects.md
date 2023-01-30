@@ -19,7 +19,7 @@ In this exercise you will create an effect for loading flights.
 
     export const loadFlights = createAction(
         '[FlightBooking] LoadFlights',
-        props<{from: string, to: string, urgent: boolean}>()
+        props<{ from: string, to: string, urgent: boolean }>()
     );
     ```
 
@@ -36,12 +36,11 @@ In this exercise you will create an effect for loading flights.
     ```TypeScript
     @Injectable()
     export class FlightBookingEffects {
-
         loadFlights$ = createEffect((): Observable<any> => 
             this.actions$.pipe(
                 ofType(loadFlights), 
-                switchMap(a => this.flightService.find(a.from, a.to, a.urgent)),
-                map(flights => flightsLoaded({ flights }))
+                switchMap((action) => this.flightService.find(action.from, action.to, action.urgent)),
+                map((flights) => flightsLoaded({ flights }))
             )
         );
 
@@ -65,7 +64,9 @@ In this exercise you will create an effect for loading flights.
 
     ```TypeScript
     search(): void {
-      if (!this.from || !this.to) return;
+      if (!this.from || !this.to) {
+        return;
+      }
 
       // New:
       this.store.dispatch(loadFlights({
@@ -100,15 +101,24 @@ In this exercise you will create an effect for loading flights.
 
 ## Bonus: Error Handling
 
-1. Open your ``flight-booking.actions.ts`` file and add an LoadFlightsError Action without a payload:
+1. Open your ``flight-booking.actions.ts`` file and add an LoadFlightsError Action with an ``HttpErrorResponse`` payload:
 
   ```typescript
   export const loadFlightsError = createAction(
-    '[FlightBooking] Load Flights Error'
+    '[FlightBooking] LoadFlightsError',
+    props<{ err: HttpErrorResponse }>()
   );
   ```
 
-2. In your ``flight-booking.effects.ts``, add an error handler to the switchMap. This error handler should return the ``loadFlightError`` action.
+2. It's probably a good idea to also rename your ``flightsLoaded`` action to ``loadFlightsSuccess`` to show the relation of these three actions:
+
+  ```typescript
+   export const loadFlights = createAction('[FlightBooking] LoadFlights', props<{ from: string; to: string; urgent: boolean }>());
+   export const loadFlightsError = createAction('[FlightBooking] LoadFlightsError', props<{ err: HttpErrorResponse }>());
+   export const loadFlightsSuccess = createAction('[FlightBooking] LoadFlightsSuccess', props<{ flights: Flight[] }>());
+  ```
+
+3. In your ``flight-booking.effects.ts``, add an error handler to the switchMap. This error handler should return the ``loadFlightError`` action.
 
     <details>
     <summary>Show code</summary>
@@ -117,9 +127,9 @@ In this exercise you will create an effect for loading flights.
     ```typescript
         loadFlightBookings$ = createEffect((): Observable<FlightBookingActions> => this.actions$.pipe(
             ofType(loadFlights),
-            switchMap(a => this.flightService.find(a.from, a.to, a.urgent).pipe(
-                map(flights => flightsLoaded({flights})),
-                catchError(err => of(loadFlightsError()))
+            switchMap((action) => this.flightService.find(action.from, action.to, action.urgent).pipe(
+                map((flights) => loadFlightsSuccess({ flights })),
+                catchError((err) => of(loadFlightsError({ err })))
             )),
         ));
     ```
@@ -127,6 +137,6 @@ In this exercise you will create an effect for loading flights.
     </p>  
     </details>
 
-3. Test your solution. You can simulate an error with the Browser's dev tools by activating offline module in the ``Network`` tab.
+4. Test your solution. You can simulate an error with the Browser's dev tools by activating offline module in the ``Network`` tab.
    
-4. Use the Redux Dev Tools to make sure, that the ``loadFlightsError`` action is send to the store.
+5. Use the Redux Dev Tools to make sure, that the ``loadFlightsError`` action is send to the store.

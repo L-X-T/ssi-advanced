@@ -1,35 +1,12 @@
 # Manage state with @ngrx/store
 
 - [Manage state with @ngrx/store](#manage-state-with-ngrxstore)
-  - [Prerequisites](#prerequisites)
   - [Setup the store](#setup-the-store)
   - [Setup State Management for a Feature Module](#setup-state-management-for-a-feature-module)
   - [Update a Flight](#update-a-flight)
   - [Bonus: Connecting the Router to the Store *](#bonus-connecting-the-router-to-the-store-)
   - [Bonus: Using NgRx with Module Federation *](#bonus-using-ngrx-with-module-federation)
   - [Bonus: Using Mutables with ngrx-etc *](#bonus-using-mutables-with-ngrx-etc-)
-
-## Prerequisites
-
-**If** you don't have installed the Angular CLI do it now:
-
-  ```
-  npm i -g @angular/cli
-  ```
-
-**If and only if** you don't have installed the CLI and the last command didn't work (e. g. b/c of your firewall) you can use the project-local CLI installation here. In this case, you have to execute the CLI with ``npm run``. The next snipped shows this by requesting the CLI's version:
-
-  ```
-  npm run ng -- -v
-  ```
-
-  Please note, that you need those two dashes to tell npm that the parameters are not indented for npm but ng.
-
-  If you have a newer version of npm, you could also use ``npx``:
-
-  ```
-  npx ng -v
-  ```
 
 ## Setup the store
 
@@ -129,11 +106,12 @@
     };
     ```
    
-6. Open the file `flight-booking.actions.ts` and setup a ``flightsLoaded`` action creator.
+6. Open the file `flight-booking.actions.ts` and set up a ``flightsLoaded`` action creator, replacing the ``loadFlightBookings`` action.
 
     <details>
     <summary>Show code</summary>
     <p>
+   
     You can replace the whole file with the following content:
 
     ```typescript
@@ -148,7 +126,7 @@
     </p>
     </details>
 
-7. Open the file ``flight-booking.reducer.ts`` and extend the existing reducer function so that it handles the ``flightsLoaded`` action.
+7. Open the file ``flight-booking.reducer.ts`` and adjust the existing reducer function for the just deleted ``loadFlightBookings`` action so that it handles the ``flightsLoaded`` action.
 
     <details>
     <summary>Show code</summary>
@@ -158,7 +136,7 @@
     export const reducer = createReducer(
       initialState,
 
-      on(flightsLoaded, (state, action) => {
+      on(flightsLoaded, (state, action): State => {
         const flights = action.flights;
         return { ...state, flights };
       })
@@ -179,7 +157,7 @@
 
       [...]
 
-      flights$ = this.store.select(s => s.flightBooking.flights);
+      flights$ = this.store.select((appState) => appState[flightBookingFeatureKey].flights);
 
       constructor(
         [...]
@@ -209,11 +187,11 @@
 
       // new:
       this.flightService.find(this.from, this.to, this.urgent).subscribe({
-        next: flights => { 
-          this.store.dispatch(flightsLoaded({flights}));
+        next: (flights) => { 
+          this.store.dispatch(flightsLoaded({ flights }));
         },
-        error: error => {
-          console.error('error', error);
+        error: (err) => {
+          console.error('error', err);
         } 
       });
     }
@@ -262,7 +240,7 @@ This exercise shows that working with immutables in JavaScript is not always as 
 
     export const updateFlight = createAction(
       '[FlightBooking] Update Flight',
-      props<{flight: Flight}>()
+      props<{ flight: Flight }>()
     );
     ```
 
@@ -280,13 +258,13 @@ This exercise shows that working with immutables in JavaScript is not always as 
     const reducer = createReducer(
       initialState,
 
-      on(flightsLoaded, (state, action) => {
+      on(flightsLoaded, (state, action): State => {
         const flights = action.flights;
         return { ...state, flights };
       }),
 
       // New:
-      on(updateFlight, (state, action) => {
+      on(updateFlight, (state, action): State => {
         const flight = action.flight;
         const flights = state.flights.map(f => f.id === flight.id? flight: f);
         return { ...state, flights };
@@ -313,7 +291,7 @@ This exercise shows that working with immutables in JavaScript is not always as 
         const newDate = new Date(oldDate.getTime() + 15 * 60 * 1000);
         const newFlight = { ...flight, date: newDate.toISOString() };
         
-        this.store.dispatch(updateFlight({flight: newFlight}));
+        this.store.dispatch(updateFlight({ flight: newFlight }));
       });
     }
     ```
@@ -325,8 +303,7 @@ This exercise shows that working with immutables in JavaScript is not always as 
 
     ```html
     <ng-container *ngIf="flights$ | async as flights">
-      <button *ngIf="flights.length > 0" class="btn btn-default"
-        (click)="delay()">
+      <button *ngIf="flights.length > 0" class="btn btn-default" (click)="delay()">
         Delay 1st Flight
       </button>
     </ng-container>

@@ -29,15 +29,15 @@ In this part of the lab, you'll add a selector that queries all the flights that
 
     ```typescript
     import { createSelector } from "@ngrx/store";
-    import { FlightBookingAppState } from "./flight-booking.reducer";
+    import { FlightBookingAppState, flightBookingFeatureKey } from './flight-booking.reducer';
 
-    export const selectFlights = (s: FlightBookingAppState) => s.flightBooking.flights;
-    export const negativeList = (s: FlightBookingAppState) => s.flightBooking.negativeList;
+    export const selectFlights = (appState: FlightBookingAppState) => appState[flightBookingFeatureKey].flights;
+    export const negativeList = (appState: FlightBookingAppState) => appState[flightBookingFeatureKey].negativeList;
 
     export const selectedFilteredFlights = createSelector(
         selectFlights,
         negativeList,
-        (flights, negativeList) => flights.filter(f => !negativeList.includes(f.id))
+        (flights, negativeList) => flights.filter((f) => !negativeList.includes(f.id))
     );
     ```
 
@@ -55,12 +55,12 @@ To get rid of your FlightBookingAppState type, you can use a feature selector po
 
 ```TypeScript
 // Create feature selector
-export const selectFlightBooking = createFeatureSelector<State>('flightBooking');
+export const selectFlightBooking = createFeatureSelector<State>(flightBookingFeatureKey);
 
 // Use feature selector to get data from feature branch
-export const selectFlights = createSelector(selectFlightBooking, s => s.flights);
+export const selectFlights = createSelector(selectFlightBooking, (featureState) => featureState.flights);
 
-export const negativeList = createSelector(selectFlightBooking, s => s.negativeList);
+export const negativeList = createSelector(selectFlightBooking, (featureState) => featureState.negativeList);
 
 [...]
 ```

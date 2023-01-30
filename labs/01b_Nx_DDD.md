@@ -47,7 +47,7 @@ So far, we've only used a simplified version of the architecture matrix presente
 
 6. Inspect the generated libs and the generated app. You should find the following:
 
-   - Assigned tags within ``nx.json``
+   - Assigned tags within ``angular.json``
 
    - Further access restrictions within ``.eslintrc.json``.
 
@@ -403,22 +403,6 @@ After performing some changes, it's important to know which apps and libs might 
     })
     export class LuggageFeatureCheckinModule {}
     ```
-
-3. Please note that the linter tells you now, that this access isn't allowed. If you don't get the linting error in your IDE, start the linter on the command line (``nx lint luggage-feature-checkin``).
-
-
-4. Make sure, this UI library can only be accessed by the feature libraries in your domain. For this, open your ``nx.json`` assign the following tags to the lib:
-
-    ```json
-    "luggage-ui-card": {
-      "tags": ["domain:luggage", "type:ui"]
-    },
-    ```
-
-5. Restart your IDE, as global config files like ``nx.json`` are only read once during the program start.
-
-6. Make sure, you don't get this linting error anymore. Optionally, you can also start the linter on the command line (``nx lint luggage-feature-checkin``).
-
 
 ## Bonus: Configure a Shared Utility Library **
 
