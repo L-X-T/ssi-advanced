@@ -7,12 +7,7 @@
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": [
-          "build",
-          "lint",
-          "test",
-          "e2e"
-        ],
+        "cacheableOperations": ["build", "lint", "test", "e2e"],
         "--cacheDirectory": "c:\\temp\\cache",
         "parallel": 3
       }
@@ -22,12 +17,7 @@
     "default": {
       "runner": "./tools/task-runners/custom-task-runner",
       "options": {
-        "cacheableOperations": [
-          "build",
-          "lint",
-          "test",
-          "e2e"
-        ],
+        "cacheableOperations": ["build", "lint", "test", "e2e"],
         "remoteDirectory": "c:\\temp\\remote-cache"
       }
     }
@@ -64,26 +54,18 @@
     }
   },
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "sharedGlobals": [
       "{workspaceRoot}/angular.json",
       "{workspaceRoot}/tsconfig.base.json",
       "{workspaceRoot}/tslint.json",
       "{workspaceRoot}/nx.json"
     ],
-    "production": [
-      "default"
-    ]
+    "production": ["default"]
   },
   "targetDefaults": {
     "build": {
-      "inputs": [
-        "production",
-        "^production"
-      ]
+      "inputs": ["production", "^production"]
     }
   }
 }

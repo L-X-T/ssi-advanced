@@ -1,0 +1,36 @@
+{
+  "name": "flight-lib",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/flight-lib/src",
+  "prefix": "flight",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:ng-packagr-lite",
+      "options": {
+        "tsConfig": "libs/flight-lib/tsconfig.lib.json",
+        "project": "libs/flight-lib/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/flight-lib/tsconfig.lib.prod.json"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": ["libs/flight-lib/src/**/*.ts", "libs/flight-lib/src/**/*.html"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/libs/flight-lib"],
+      "options": {
+        "jestConfig": "libs/flight-lib/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": ["domain:flights", "type:domain-logic"]
+}

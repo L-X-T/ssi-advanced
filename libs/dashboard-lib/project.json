@@ -1,0 +1,36 @@
+{
+  "name": "dashboard-lib",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/dashboard-lib/src",
+  "prefix": "flight",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:ng-packagr-lite",
+      "options": {
+        "tsConfig": "libs/dashboard-lib/tsconfig.lib.json",
+        "project": "libs/dashboard-lib/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/dashboard-lib/tsconfig.lib.prod.json"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": ["libs/dashboard-lib/src/**/*.ts", "libs/dashboard-lib/src/**/*.html"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/libs/dashboard-lib"],
+      "options": {
+        "jestConfig": "libs/dashboard-lib/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": ["domain:dashboard", "type:domain-logic"]
+}

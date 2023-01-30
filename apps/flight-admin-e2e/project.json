@@ -1,0 +1,30 @@
+{
+  "name": "flight-admin-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/flight-admin-e2e/src",
+  "projectType": "application",
+  "targets": {
+    "e2e": {
+      "executor": "@nrwl/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/flight-admin-e2e/cypress.config.ts",
+        "tsConfig": "apps/flight-admin-e2e/tsconfig.e2e.json",
+        "devServerTarget": "flight-admin:serve",
+        "testingType": "e2e"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "flight-admin:serve:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": ["apps/flight-admin-e2e/**/*.{js,ts}"]
+      }
+    }
+  },
+  "tags": ["e2e"],
+  "implicitDependencies": ["flight-admin"]
+}
