@@ -85,5 +85,8 @@
         "^production"
       ]
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }
