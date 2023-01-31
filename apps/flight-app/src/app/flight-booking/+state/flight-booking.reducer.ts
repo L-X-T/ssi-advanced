@@ -35,7 +35,7 @@ export const initialState: State = {
 export const reducer = createReducer(
   initialState,
 
-  on(FlightBookingActions.loadFlights, (state, action) => {
+  on(FlightBookingActions.loadFlights, (state, action): State => {
     return {
       ...state,
       flights: [],
@@ -49,18 +49,18 @@ export const reducer = createReducer(
     };
   }),
 
-  on(FlightBookingActions.loadFlightsError, (state, action) => {
+  on(FlightBookingActions.loadFlightsError, (state, action): State => {
     return { ...state, isLoadingFlights: false, loadingFlightsError: action.err.message };
   }),
 
-  on(FlightBookingActions.loadFlightsSuccessfully, (state, action) => {
+  on(FlightBookingActions.loadFlightsSuccessfully, (state, action): State => {
     const flights = action.flights;
     const isLoadingFlights = false;
     const loadingFlightsError = '';
     return { ...state, flights, isLoadingFlights, loadingFlightsError };
   }),
 
-  on(FlightBookingActions.updateFlight, (state, action) => {
+  on(FlightBookingActions.updateFlight, (state, action): State => {
     const flight = action.flight;
     const flights = state.flights.map((f) => (f.id === flight.id ? flight : f));
     return { ...state, flights };

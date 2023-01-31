@@ -100,15 +100,24 @@ In this exercise you will create an effect for loading flights.
 
 ## Bonus: Error Handling
 
-1. Open your ``flight-booking.actions.ts`` file and add an LoadFlightsError Action without a payload:
+1. Open your ``flight-booking.actions.ts`` file and add an LoadFlightsError Action with an ``HttpErrorResponse`` payload:
 
   ```typescript
   export const loadFlightsError = createAction(
-    '[FlightBooking] Load Flights Error'
+    '[FlightBooking] LoadFlightsError',
+    props<{ err: HttpErrorResponse }>()
   );
   ```
 
-2. In your ``flight-booking.effects.ts``, add an error handler to the switchMap. This error handler should return the ``loadFlightError`` action.
+2. It's probably a good idea to rename the ``flightsLoaded`` to ``loadFlightsSuccess`` to show the relation between those three actions:
+
+  ```typescript
+  export const loadFlights = createAction('[FlightBooking] LoadFlights', props<{ from: string; to: string; urgent: boolean }>());
+  export const loadFlightsError = createAction('[FlightBooking] LoadFlightsError', props<{ err: HttpErrorResponse }>());
+  export const loadFlightsSuccess = createAction('[FlightBooking] LoadFlightsSuccess', props<{ flights: Flight[] }>());
+  ```
+
+3. In your ``flight-booking.effects.ts``, add an error handler to the switchMap. This error handler should return the ``loadFlightError`` action.
 
     <details>
     <summary>Show code</summary>
@@ -127,6 +136,6 @@ In this exercise you will create an effect for loading flights.
     </p>  
     </details>
 
-3. Test your solution. You can simulate an error with the Browser's dev tools by activating offline module in the ``Network`` tab.
+4. Test your solution. You can simulate an error with the Browser's dev tools by activating offline module in the ``Network`` tab.
    
-4. Use the Redux Dev Tools to make sure, that the ``loadFlightsError`` action is send to the store.
+5. Use the Redux Dev Tools to make sure, that the ``loadFlightsError`` action is send to the store.

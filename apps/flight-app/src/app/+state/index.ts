@@ -4,6 +4,7 @@ import { environment } from '../../environments/environment';
 import { localStorageSync } from 'ngrx-store-localstorage';
 import { flightBookingFeatureKey } from '../flight-booking/+state/flight-booking.reducer';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface State {}
 
 export const reducers: ActionReducerMap<State> = {
