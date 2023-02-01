@@ -19,3 +19,5 @@ export const selectFlightsWithProps = (props: {
 export const selectIsLoadingFlights = createSelector(selectFlightBookingState, (s) => s.isLoadingFlights);
 
 export const selectLoadingFlightsError = createSelector(selectFlightBookingState, (s) => s.loadingFlightsError);
+
+export const selectFormValue = createSelector(selectFlightBookingState, (s) => s.formValue);

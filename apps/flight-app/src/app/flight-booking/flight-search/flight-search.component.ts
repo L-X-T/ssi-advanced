@@ -5,7 +5,12 @@ import { Store } from '@ngrx/store';
 import { FlightBookingAppState, flightBookingFeatureKey } from '../+state/flight-booking.reducer';
 import { loadFlights, updateFlight } from '../+state/flight-booking.actions';
 import { take } from 'rxjs/operators';
-import { selectFlightsWithProps, selectIsLoadingFlights, selectLoadingFlightsError } from '../+state/flight-booking.selectors';
+import {
+  selectFlightsWithProps,
+  selectFormValue,
+  selectIsLoadingFlights,
+  selectLoadingFlightsError
+} from '../+state/flight-booking.selectors';
 
 @Component({
   selector: 'flight-search',
@@ -13,8 +18,8 @@ import { selectFlightsWithProps, selectIsLoadingFlights, selectLoadingFlightsErr
   styleUrls: ['./flight-search.component.css']
 })
 export class FlightSearchComponent implements OnInit {
-  from = 'Hamburg'; // in Germany
-  to = 'Graz'; // in Austria
+  from = ''; // in Germany
+  to = ''; // in Austria
   urgent = false;
   // "shopping basket" with selected flights
   basket: { [id: number]: boolean } = {
@@ -22,13 +27,20 @@ export class FlightSearchComponent implements OnInit {
     5: true
   };
 
+  formValue$ = this.store.select(selectFormValue);
   flights$ = this.store.select(selectFlightsWithProps({ blackList: [3] }));
   isLoadingFlight$ = this.store.select(selectIsLoadingFlights);
   loadingFlightsError$ = this.store.select(selectLoadingFlightsError);
 
   constructor(private store: Store<FlightBookingAppState>) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.formValue$.pipe(take(1)).subscribe((formValue) => {
+      this.from = formValue.from;
+      this.to = formValue.to;
+      this.urgent = formValue.urgent;
+    });
+  }
 
   search(): void {
     if (!this.from || !this.to) return;

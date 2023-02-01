@@ -9,6 +9,11 @@ export interface FlightBookingAppState {
 }
 
 export interface State {
+  formValue: {
+    from: string;
+    to: string;
+    urgent: boolean;
+  };
   flights: Flight[];
   negativeList: number[];
   isLoadingFlights: boolean;
@@ -16,6 +21,11 @@ export interface State {
 }
 
 export const initialState: State = {
+  formValue: {
+    from: 'Hamburg',
+    to: 'Graz',
+    urgent: false
+  },
   flights: [],
   negativeList: [3],
   isLoadingFlights: false,
@@ -26,7 +36,17 @@ export const reducer = createReducer(
   initialState,
 
   on(FlightBookingActions.loadFlights, (state, action) => {
-    return { ...state, flights: [], isLoadingFlights: true, loadingFlightsError: '' };
+    return {
+      ...state,
+      flights: [],
+      isLoadingFlights: true,
+      loadingFlightsError: '',
+      formValue: {
+        from: action.from,
+        to: action.to,
+        urgent: action.urgent
+      }
+    };
   }),
 
   on(FlightBookingActions.loadFlightsError, (state, action) => {
